@@ -1,5 +1,5 @@
-// 🐨 make sure to add the comment and import jsx from @emotion/core
-// up here so you can use the css prop
+/** @jsx jsx */
+import {jsx} from '@emotion/core'
 
 // 🐨 let's get a solid reset of global styles so everything looks a bit better
 // In this project we're using bootstrap-reboot which you can import from
@@ -7,14 +7,16 @@
 // 🦉 Note: you can definitely use regular styles to style React apps
 // and using any modern toolchain will allow you to simply import the CSS file
 // but CSS-in-JS is generally easier to maintain.
+import 'bootstrap/dist/css/bootstrap-reboot.css'
 import '@reach/dialog/styles.css'
 import * as React from 'react'
 import {createRoot} from 'react-dom/client'
 // 🐨 you'll need to import some new components that you'll be creating
 // in this file
-// import {Button, Input, FormGroup} from './components/lib'
+import {Button, Input, FormGroup, BookShelfContainerCss, FormCss, Spinner} from './components/lib'
 import {Modal, ModalContents, ModalOpenButton} from './components/modal'
 import {Logo} from './components/logo'
+
 
 function LoginForm({onSubmit, submitButton}) {
   function handleSubmit(event) {
@@ -38,18 +40,22 @@ function LoginForm({onSubmit, submitButton}) {
   //      maxWidth: '300px',
   //    },
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+        css={FormCss}
+        onSubmit={handleSubmit}
+        >
       {/* 🐨 these div elements could be a FormGroup you create in components/lib */}
       {/* 🐨 and the inputs elements could be custom styled Input components too */}
-      <div>
+      <FormGroup>
         <label htmlFor="username">Username</label>
-        <input id="username" />
-      </div>
-      <div>
+        <Input id="username" />
+      </FormGroup>
+      <FormGroup>
         <label htmlFor="password">Password</label>
-        <input id="password" type="password" />
-      </div>
+        <Input id="password" type="password" />
+      </FormGroup>
       <div>{React.cloneElement(submitButton, {type: 'submit'})}</div>
+      <Spinner />
     </form>
   )
 }
@@ -72,7 +78,7 @@ function App() {
   //    width: '100%',
   //    height: '100vh',
   return (
-    <div>
+    <div css={BookShelfContainerCss}>
       <Logo width="80" height="80" />
       <h1>Bookshelf</h1>
       {/*
@@ -83,26 +89,30 @@ function App() {
             gridGap: '0.75rem',
       */}
       {/* 🐨 And make sure to use the new Button component for all these buttons */}
-      <div>
+      <div css={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gridGap: '0.75rem',
+      }}>
         <Modal>
           <ModalOpenButton>
-            <button variant="primary">Login</button>
+            <Button >Login</Button>
           </ModalOpenButton>
           <ModalContents aria-label="Login form" title="Login">
             <LoginForm
               onSubmit={login}
-              submitButton={<button variant="primary">Login</button>}
+              submitButton={<Button variant="primary">Login</Button>}
             />
           </ModalContents>
         </Modal>
         <Modal>
           <ModalOpenButton>
-            <button variant="secondary">Register</button>
+            <Button variant="secondary">Register</Button>
           </ModalOpenButton>
           <ModalContents aria-label="Registration form" title="Register">
             <LoginForm
               onSubmit={register}
-              submitButton={<button variant="secondary">Register</button>}
+              submitButton={<Button variant="secondary">Register</Button>}
             />
           </ModalContents>
         </Modal>
