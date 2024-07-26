@@ -121,65 +121,60 @@ const FormCss = styled.css=({
   }
 });
 
-const keyFrameSpin = keyframes`
-from {
-  transform:rotate(0deg);
-}
-to {
-  transform:rotate(360deg);
-}`;
-
-const Spinner = styled(FaSpinner)({
-  animationName: keyFrameSpin,
-  animationDuration: '4000ms',
-  animationIterationCount: 'infinite',
-  animationTimingFunction: 'linear',
-});
-
-
-// div {
-//   margin: 20px;
-//   width: 100px;
-//   height: 100px;
-//   background: #f00;
-//   -webkit-animation-name: spin;
-//   -webkit-animation-duration: 4000ms;
-//   -webkit-animation-iteration-count: infinite;
-//   -webkit-animation-timing-function: linear;
-//   -moz-animation-name: spin;
-//   -moz-animation-duration: 4000ms;
-//   -moz-animation-iteration-count: infinite;
-//   -moz-animation-timing-function: linear;
-//   -ms-animation-name: spin;
-//   -ms-animation-duration: 4000ms;
-//   -ms-animation-iteration-count: infinite;
-//   -ms-animation-timing-function: linear;
-  
-//   animation-name: spin;
-//   animation-duration: 4000ms;
-//   animation-iteration-count: infinite;
-//   animation-timing-function: linear;
-// }
-// @-ms-keyframes spin {
-//   from { -ms-transform: rotate(0deg); }
-//   to { -ms-transform: rotate(360deg); }
-// }
-// @-moz-keyframes spin {
-//   from { -moz-transform: rotate(0deg); }
-//   to { -moz-transform: rotate(360deg); }
-// }
-// @-webkit-keyframes spin {
-//   from { -webkit-transform: rotate(0deg); }
-//   to { -webkit-transform: rotate(360deg); }
-// }
-// @keyframes spin {
+// My own implementation
+// const keyFrameSpin = keyframes`
+//   @-ms-keyframes spin {
+//     from { -ms-transform: rotate(0deg); }
+//     to { -ms-transform: rotate(360deg); }
+//   }
+//   @-moz-keyframes spin {
+//     from { -moz-transform: rotate(0deg); }
+//     to { -moz-transform: rotate(360deg); }
+//   }
+//   @-webkit-keyframes spin {
+//     from { -webkit-transform: rotate(0deg); }
+//     to { -webkit-transform: rotate(360deg); }
+//   }
 //   from {
-//       transform:rotate(0deg);
+//     transform:rotate(0deg);
 //   }
 //   to {
-//       transform:rotate(360deg);
+//     transform:rotate(360deg);
 //   }
-// }
+//   `;
 
+// const Spinner = styled(FaSpinner)({
+//   animationName: keyFrameSpin,
+//   animationDuration: '4000ms',
+//   animationIterationCount: 'infinite',
+//   animationTimingFunction: 'linear',
+// });
+
+// const spin = keyframes`
+//   from {
+//     transform: rotate(0deg);
+//   }
+//   to {
+//     transform: rotate(360deg);
+//   }
+// `;
+
+const spin = keyframes({
+  '0%': {
+    transform: 'rotate(0deg)',
+  },
+  '100%': {
+    transform: 'rotate(360deg)',
+  },
+});
+
+const Spinner = styled(FaSpinner)({
+  animation: `${spin} 1s linear infinite`,
+});
+
+// For accessibility, we should always provide an aria-label for a spinner
+Spinner.defaultProps = {
+  'aria-label': 'loading',
+};
 
 export {CircleButton, Dialog, BookShelfContainerCss, Button, PrimaryButton, SecondaryButton, Input, FormGroup, FormCss, Spinner}
