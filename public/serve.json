@@ -1,1 +1,9 @@
-{}
+{
+    "redirects": [
+        {
+            "source": "/",
+            "destination": "/discover",
+            "statusCode": 302
+        }
+    ]
+}

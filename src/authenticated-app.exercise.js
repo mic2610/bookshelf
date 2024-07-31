@@ -128,13 +128,6 @@ function Nav() {
 }
 
 function AppRoutes({user}) {
-  // 🐨 Return all the routes here.
-  // 💰 Here's the mapping of URL to element:
-  //     /discover         <DiscoverBooksScreen user={user} />
-  //     /book/:bookId     <BookScreen user={user} />
-  //     *                 <NotFoundScreen />
-  //
-  // Make sure to check the INSTRUCTIONS.md for how this should be structured
   return (
     <Routes>
       <Route path="/discover" element={<DiscoverBooksScreen user={user} />} />
