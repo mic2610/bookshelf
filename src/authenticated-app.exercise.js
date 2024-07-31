@@ -54,8 +54,8 @@ function AuthenticatedApp({user, logout}) {
   )
 }
 
-function NavLink({activeCss, to, ...props}) {
-  // 🐨 change this from an <a /> to a <Link />
+function NavLink(props) {
+  let isMatched = useMatch(props.to);
 
   return (
     <Link
@@ -75,16 +75,22 @@ function NavLink({activeCss, to, ...props}) {
           background: colors.gray10,
         },
       },
-      {...activeCss}
+      isMatched
+        ? {
+          borderLeft: `5px solid ${colors.indigo}`,
+          background: colors.gray10,
+          ':hover': {
+            background: colors.gray20,
+          }
+        }
+        : null,
     ]}
-      to={to}
       {...props}
     />
   )
 }
 
 function Nav() {
-  let isDiscoverActive = useMatch('/discover');
   return (
     <nav
       css={{
@@ -110,17 +116,7 @@ function Nav() {
               🐨 Once the NavLink has been updated to use a Router Link,
                 change from the href prop to a "to" prop
           */}
-          <NavLink
-            to={'/discover'}
-            activeCss={isDiscoverActive
-              ? {
-                borderLeft: `5px solid ${colors.indigo}`,
-                background: colors.gray10,
-                ':hover': {
-                  background: colors.gray20,
-                },
-            }
-            : null}>Discover</NavLink>
+          <NavLink to={'/discover'}>Discover</NavLink>
         </li>
       </ul>
     </nav>
