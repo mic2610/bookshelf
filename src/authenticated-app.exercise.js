@@ -2,14 +2,13 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
-// We'll be doing a lot of stuff with the router on this page.
-// 🐨 Here's what you'll need to import from react-router-dom
-// Routes, Route, Link
+import {Routes, Route, Link, useMatch} from 'react-router-dom'
 import {Button} from './components/lib'
 import * as mq from './styles/media-queries'
 import * as colors from './styles/colors'
-// 🐨 you'll need to import all the screen components in the screens directory
-// 💰 DiscoverBooksScreen, BookScreen, NotFoundScreen
+import {DiscoverBooksScreen} from './screens/discover'
+import {BookScreen} from './screens/book'
+import {NotFoundScreen} from './screens/not-found'
 
 function AuthenticatedApp({user, logout}) {
   return (
@@ -55,11 +54,13 @@ function AuthenticatedApp({user, logout}) {
   )
 }
 
-function NavLink(props) {
+function NavLink({activeCss, to, ...props}) {
   // 🐨 change this from an <a /> to a <Link />
+
   return (
-    <a
-      css={{
+    <Link
+      css={[
+        {
         display: 'block',
         padding: '8px 15px 8px 10px',
         margin: '5px 0',
@@ -73,13 +74,17 @@ function NavLink(props) {
           textDecoration: 'none',
           background: colors.gray10,
         },
-      }}
+      },
+      {...activeCss}
+    ]}
+      to={to}
       {...props}
     />
   )
 }
 
 function Nav() {
+  let isDiscoverActive = useMatch('/discover');
   return (
     <nav
       css={{
@@ -105,7 +110,17 @@ function Nav() {
               🐨 Once the NavLink has been updated to use a Router Link,
                 change from the href prop to a "to" prop
           */}
-          <NavLink href="/discover">Discover</NavLink>
+          <NavLink
+            to={'/discover'}
+            activeCss={isDiscoverActive
+              ? {
+                borderLeft: `5px solid ${colors.indigo}`,
+                background: colors.gray10,
+                ':hover': {
+                  background: colors.gray20,
+                },
+            }
+            : null}>Discover</NavLink>
         </li>
       </ul>
     </nav>
@@ -120,7 +135,13 @@ function AppRoutes({user}) {
   //     *                 <NotFoundScreen />
   //
   // Make sure to check the INSTRUCTIONS.md for how this should be structured
-  return null
+  return (
+    <Routes>
+      <Route path="/discover" element={<DiscoverBooksScreen user={user} />} />
+      <Route path="/book/:bookId" element={<BookScreen user={user} />} />
+      <Route path="*" element={<NotFoundScreen />} />
+    </Routes>
+  )
 }
 
 export {AuthenticatedApp}
