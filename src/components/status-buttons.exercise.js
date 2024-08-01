@@ -54,28 +54,15 @@ function StatusButtons({user, book}) {
   const {data: listItems} = useQuery('list-items', () => client('list-items', {token: user.token}).then(data => data.listItems));
   const listItem = listItems?.find(li => li.bookId === book.id);
 
-  // const {data: listItems} = useQuery({
-  //   queryKey: 'list-items',
-  //   queryFn: () =>
-  //     client(`list-items`, {token: user.token}).then(data => data.listItems),
-  // })
-  // const listItem = listItems?.find(li => li.bookId === book.id) ?? null
-  
-
-  // 🐨 call useMutation here and assign the mutate function to "update"
-  // the mutate function should call the list-items/:listItemId endpoint with a PUT
-  //   and the updates as data. The mutate function will be called with the updates
-  //   you can pass as data.
-
-  const Update = () => useMutation(
-    updates => client(`list-items/${listItem.id}`, {data: updates, token: user.token, method: 'PUT'}),
+  const [update] = useMutation(
+    ({updates}) => client(`list-items/${updates.id}`, {data: updates, token: user.token, method: 'PUT'}),
     { onSettled: () => queryCache.invalidateQueries('list-items') }
   );
 
   // 🐨 call useMutation here and assign the mutate function to "remove"
   // the mutate function should call the list-items/:listItemId endpoint with a DELETE
-  const Remove = () => useMutation(
-    updates => client(`list-items/${listItem.id}`, {method: 'DELETE'}),
+  const [remove] = useMutation(
+    ({id}) => client(`list-items/${id}`, {method: 'DELETE', token: user.token}),
     { onSettled: () => queryCache.invalidateQueries('list-items') }
   );
 
@@ -94,14 +81,14 @@ function StatusButtons({user, book}) {
           <TooltipButton
             label="Unmark as read"
             highlight={colors.yellow}
-            onClick={() => Update({id: listItem.id, finishDate: null})}
+            onClick={() => update({updates: {id: listItem.id, finishDate: null }})}
             icon={<FaBook />}
           />
         ) : (
           <TooltipButton
             label="Mark as read"
             highlight={colors.green}
-            onClick={() => Update({id: listItem.id, finishDate: Date.now()})}
+            onClick={() => update({updates: { id: listItem.id, finishDate: Date.now()}})}
             icon={<FaCheckCircle />}
           />
         )
@@ -112,7 +99,7 @@ function StatusButtons({user, book}) {
           highlight={colors.danger}
           // 🐨 add an onClick here that calls remove
           icon={<FaMinusCircle />}
-          onClick={() => Remove({id: listItem.id})}
+          onClick={() => remove({id: listItem.id})}
         />
       ) : (
         <TooltipButton

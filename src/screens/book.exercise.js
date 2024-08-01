@@ -33,13 +33,13 @@ function BookScreen({user}) {
 
   // 🐨 call useQuery here
   // queryKey should be ['book', {bookId}]
-  const {data, error, isLoading, isError, isSuccess} = useQuery(['book', {bookId}], () => client(`books/${bookId}`, {token: user.token}).then(data => data.book));
+  const {data, error, isLoading, isError, isSuccess} = useQuery(['book', {bookId}], () => client(`books/${bookId}`, {token: user.token}));
   // queryFn should be what's currently passed in the run function below
 
   // 🐨 call useQuery to get the list item from the list-items endpoint
   // queryKey should be 'list-items'
   // queryFn should call the 'list-items' endpoint with the user's token
-  const {data: listItems} = useQuery('list-items', () => client('list-items', {token: user.token}));
+  const {data: listItems} = useQuery('list-items', () => client('list-items', {token: user.token}).then(data => data.listItems));
   const listItem = listItems?.find(li => li.bookId === bookId);
   // 🦉 NOTE: the backend doesn't support getting a single list-item by it's ID
   // and instead expects us to cache all the list items and look them up in our
@@ -135,18 +135,18 @@ function NotesTextarea({listItem, user}) {
 
 
 
-  // 💰 if you want to get the list-items cache updated after this query finishes
-  // then use the `onSettled` config option to queryCache.invalidateQueries('list-items')
-  // 💣 DELETE THIS ESLINT IGNORE!! Don't ignore the exhaustive deps rule please
-  const mutate = useMutation(
-    updates => client(`list-items/${listItem.id}`, {data: updates, method: 'PUT'}),
-    { onSettled: () => queryCache.invalidateQueries('list-items') }
-  );
-
-  const debouncedMutate = React.useMemo(
-    () => debounceFn(() => mutate(), {wait: 300}),
-    [mutate],
+  const [mutate] = useMutation(
+    updates =>
+      client(`list-items/${updates.id}`, {
+        method: 'PUT',
+        data: updates,
+        token: user.token,
+      }),
+    {onSettled: () => queryCache.invalidateQueries('list-items')},
   )
+  const debouncedMutate = React.useMemo(() => debounceFn(mutate, {wait: 300}), [
+    mutate,
+  ])
 
   function handleNotesChange(e) {
     debouncedMutate({id: listItem.id, notes: e.target.value})
