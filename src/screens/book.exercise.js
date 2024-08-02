@@ -37,16 +37,8 @@ const loadingBook = {
 
 function BookScreen({user}) {
   const {bookId} = useParams();
-  // 💣 remove the useAsync call here
-
-  // 🐨 call useQuery here
-  // queryKey should be ['book', {bookId}]
-  // const {data, error, isLoading, isError, isSuccess} = useQuery(['book', {bookId}], () => client(`books/${bookId}`, {token: user.token}));
   const {data, error, isLoading, isError, isSuccess} = useBook(bookId, user);
-  // queryFn should be what's currently passed in the run function below
-
   const listItem = useListItem({user, bookId});
-
   const book = data?.book ?? loadingBook;
   const {title, author, coverImageUrl, publisher, synopsis} = book;
 
