@@ -1,12 +1,8 @@
 /** @jsx jsx */
-import {jsx} from '@emotion/core'
-
-// 🐨 you'll need useQuery from 'react-query'
-// 🐨 and client from 'utils/api-client'
-import {useQuery} from 'react-query';
-import {client} from 'utils/api-client'
-import {BookListUL} from './lib'
-import {BookRow} from './book-row'
+import {jsx} from '@emotion/core';
+import {BookListUL} from './lib';
+import {BookRow} from './book-row';
+import {userListItems} from 'utils/list-items.exercise';
 
 function ListItemList({
   user,
@@ -14,19 +10,18 @@ function ListItemList({
   noListItems,
   noFilteredListItems,
 }) {
-  const {data: listItems} = useQuery('list-items', () => client('list-items', {token: user.token}).then(data => data.listItems));
-
-  const filteredListItems = listItems?.filter(filterListItems)
+  const {listItems} = userListItems(user);
+  const filteredListItems = listItems?.filter(filterListItems);
 
   if (!listItems?.length) {
-    return <div css={{marginTop: '1em', fontSize: '1.2em'}}>{noListItems}</div>
+    return <div css={{marginTop: '1em', fontSize: '1.2em'}}>{noListItems}</div>;
   }
   if (!filteredListItems.length) {
     return (
       <div css={{marginTop: '1em', fontSize: '1.2em'}}>
         {noFilteredListItems}
       </div>
-    )
+    );
   }
 
   return (
@@ -37,7 +32,7 @@ function ListItemList({
         </li>
       ))}
     </BookListUL>
-  )
+  );
 }
 
-export {ListItemList}
+export {ListItemList};
