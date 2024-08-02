@@ -8,4 +8,9 @@ const useBookSearch = ({query, user}) =>
     }).then(data => data.books),
   );
 
-export {useBookSearch};
+const useBook = (bookId, user) =>
+  useQuery(['book', {bookId}], () =>
+    client(`books/${bookId}`, {token: user.token}),
+  );
+
+export {useBookSearch, useBook};

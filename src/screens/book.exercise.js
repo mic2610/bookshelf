@@ -1,21 +1,30 @@
 /** @jsx jsx */
-import {jsx} from '@emotion/core'
+import {jsx} from '@emotion/core';
 
-import * as React from 'react'
-import debounceFn from 'debounce-fn'
-import {FaRegCalendarAlt} from 'react-icons/fa'
-import Tooltip from '@reach/tooltip'
-import {useParams} from 'react-router-dom'
-import {useQuery, useMutation, queryCache} from 'react-query'
-import {useAsync} from 'utils/hooks'
-import {client} from 'utils/api-client'
-import {formatDate} from 'utils/misc'
-import * as mq from 'styles/media-queries'
-import * as colors from 'styles/colors'
-import {Textarea} from 'components/lib'
-import {Rating} from 'components/rating'
-import {StatusButtons} from 'components/status-buttons'
-import bookPlaceholderSvg from 'assets/book-placeholder.svg'
+import * as React from 'react';
+import debounceFn from 'debounce-fn';
+import {FaRegCalendarAlt} from 'react-icons/fa';
+import Tooltip from '@reach/tooltip';
+import {useParams} from 'react-router-dom';
+import {useQuery, useMutation, queryCache} from 'react-query';
+import {useAsync} from 'utils/hooks';
+import {client} from 'utils/api-client';
+import {formatDate} from 'utils/misc';
+import * as mq from 'styles/media-queries';
+import * as colors from 'styles/colors';
+import {Textarea} from 'components/lib';
+import {Rating} from 'components/rating';
+import {StatusButtons} from 'components/status-buttons';
+import bookPlaceholderSvg from 'assets/book-placeholder.svg';
+import {
+  useListItem,
+  userListItems,
+  useUpdateListItem,
+  useRemoveListItem,
+  userCreateListItem,
+} from 'utils/list-items.exercise';
+
+import {useBook} from 'utils/books.exercise';
 
 const loadingBook = {
   title: 'Loading...',
@@ -24,26 +33,19 @@ const loadingBook = {
   publisher: 'Loading Publishing',
   synopsis: 'Loading...',
   loadingBook: true,
-}
+};
 
 function BookScreen({user}) {
-  const {bookId} = useParams()
+  const {bookId} = useParams();
   // 💣 remove the useAsync call here
-  
 
   // 🐨 call useQuery here
   // queryKey should be ['book', {bookId}]
-  const {data, error, isLoading, isError, isSuccess} = useQuery(['book', {bookId}], () => client(`books/${bookId}`, {token: user.token}));
+  // const {data, error, isLoading, isError, isSuccess} = useQuery(['book', {bookId}], () => client(`books/${bookId}`, {token: user.token}));
+  const {data, error, isLoading, isError, isSuccess} = useBook(bookId, user);
   // queryFn should be what's currently passed in the run function below
 
-  // 🐨 call useQuery to get the list item from the list-items endpoint
-  // queryKey should be 'list-items'
-  // queryFn should call the 'list-items' endpoint with the user's token
-  const {data: listItems} = useQuery('list-items', () => client('list-items', {token: user.token}).then(data => data.listItems));
-  const listItem = listItems?.find(li => li.bookId === bookId);
-  // 🦉 NOTE: the backend doesn't support getting a single list-item by it's ID
-  // and instead expects us to cache all the list items and look them up in our
-  // cache. This works out because we're using react-query for caching!
+  const listItem = useListItem({user, bookId});
 
   const book = data?.book ?? loadingBook;
   const {title, author, coverImageUrl, publisher, synopsis} = book;
@@ -106,13 +108,13 @@ function BookScreen({user}) {
         <NotesTextarea user={user} listItem={listItem} />
       ) : null}
     </div>
-  )
+  );
 }
 
 function ListItemTimeframe({listItem}) {
   const timeframeLabel = listItem.finishDate
     ? 'Start and finish date'
-    : 'Start date'
+    : 'Start date';
 
   return (
     <Tooltip label={timeframeLabel}>
@@ -124,7 +126,7 @@ function ListItemTimeframe({listItem}) {
         </span>
       </div>
     </Tooltip>
-  )
+  );
 }
 
 function NotesTextarea({listItem, user}) {
@@ -132,8 +134,6 @@ function NotesTextarea({listItem, user}) {
   // the mutate function should call the list-items/:listItemId endpoint with a PUT
   //   and the updates as data. The mutate function will be called with the updates
   //   you can pass as data.
-
-
 
   const [mutate] = useMutation(
     updates =>
@@ -143,13 +143,14 @@ function NotesTextarea({listItem, user}) {
         token: user.token,
       }),
     {onSettled: () => queryCache.invalidateQueries('list-items')},
-  )
-  const debouncedMutate = React.useMemo(() => debounceFn(mutate, {wait: 300}), [
-    mutate,
-  ])
+  );
+  const debouncedMutate = React.useMemo(
+    () => debounceFn(mutate, {wait: 300}),
+    [mutate],
+  );
 
   function handleNotesChange(e) {
-    debouncedMutate({id: listItem.id, notes: e.target.value})
+    debouncedMutate({id: listItem.id, notes: e.target.value});
   }
 
   return (
@@ -175,7 +176,7 @@ function NotesTextarea({listItem, user}) {
         css={{width: '100%', minHeight: 300}}
       />
     </React.Fragment>
-  )
+  );
 }
 
-export {BookScreen}
+export {BookScreen};
