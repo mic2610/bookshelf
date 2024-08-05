@@ -2,7 +2,7 @@
 import {jsx} from '@emotion/core';
 import {BookListUL} from './lib';
 import {BookRow} from './book-row';
-import {userListItems} from 'utils/list-items.exercise';
+import {useListItems} from 'utils/list-items.exercise';
 
 function ListItemList({
   user,
@@ -10,7 +10,7 @@ function ListItemList({
   noListItems,
   noFilteredListItems,
 }) {
-  const {listItems} = userListItems(user);
+  const {listItems} = useListItems(user);
   const filteredListItems = listItems?.filter(filterListItems);
 
   if (!listItems?.length) {

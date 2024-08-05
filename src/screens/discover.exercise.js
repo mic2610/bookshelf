@@ -9,7 +9,7 @@ import * as colors from 'styles/colors';
 import {BookRow} from 'components/book-row';
 import {BookListUL, Spinner, Input} from 'components/lib';
 import bookPlaceholderSvg from 'assets/book-placeholder.svg';
-import {useBookSearch} from 'utils/books.exercise';
+import {useBookSearch, refetchBookSearchQuery} from 'utils/books.exercise';
 
 const loadingBook = {
   title: 'Loading...',
@@ -28,11 +28,15 @@ const loadingBooks = Array.from({length: 10}, (v, index) => ({
 function DiscoverBooksScreen({user}) {
   const [query, setQuery] = React.useState('');
   const [queried, setQueried] = React.useState(false);
-  const {data, error, isLoading, isError, isSuccess} = useBookSearch({
+  const {data, error, isLoading, isError, isSuccess} = useBookSearch(
     query,
     user,
-  });
+  );
   const books = data ?? loadingBooks;
+
+  React.useEffect(() => {
+    return async () => await refetchBookSearchQuery(user);
+  }, [user]);
 
   function handleSearchSubmit(event) {
     event.preventDefault();

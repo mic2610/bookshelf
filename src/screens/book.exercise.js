@@ -12,18 +12,18 @@ import {client} from 'utils/api-client';
 import {formatDate} from 'utils/misc';
 import * as mq from 'styles/media-queries';
 import * as colors from 'styles/colors';
-import {Textarea} from 'components/lib';
+import {Textarea, ErrorMessage} from 'components/lib';
 import {Rating} from 'components/rating';
 import {StatusButtons} from 'components/status-buttons';
 import bookPlaceholderSvg from 'assets/book-placeholder.svg';
 import {
   useListItem,
-  userListItems,
+  useListItems,
   useUpdateListItem,
   useRemoveListItem,
-  userCreateListItem,
+  useCreateListItem,
 } from 'utils/list-items.exercise';
-
+import {Spinner} from 'components/lib';
 import {useBook} from 'utils/books.exercise';
 
 const loadingBook = {
@@ -122,27 +122,17 @@ function ListItemTimeframe({listItem}) {
 }
 
 function NotesTextarea({listItem, user}) {
-  // 🐨 call useMutation here
-  // the mutate function should call the list-items/:listItemId endpoint with a PUT
-  //   and the updates as data. The mutate function will be called with the updates
-  //   you can pass as data.
-
-  const [mutate] = useMutation(
-    updates =>
-      client(`list-items/${updates.id}`, {
-        method: 'PUT',
-        data: updates,
-        token: user.token,
-      }),
-    {onSettled: () => queryCache.invalidateQueries('list-items')},
-  );
+  const [update, {error, isError, isLoading}] = useUpdateListItem();
   const debouncedMutate = React.useMemo(
-    () => debounceFn(mutate, {wait: 300}),
-    [mutate],
+    () => debounceFn(update, {wait: 300}),
+    [update],
   );
 
   function handleNotesChange(e) {
-    debouncedMutate({id: listItem.id, notes: e.target.value});
+    debouncedMutate({
+      updates: {id: listItem.id, notes: e.target.value},
+      user: user,
+    });
   }
 
   return (
@@ -160,6 +150,14 @@ function NotesTextarea({listItem, user}) {
         >
           Notes
         </label>
+        {isError ? (
+          <ErrorMessage
+            error={error}
+            variant="inline"
+            css={{marginLeft: 6, fontSize: '0.7em'}}
+          />
+        ) : null}
+        {isLoading ? <Spinner css={{marginLeft: 6}} /> : null}
       </div>
       <Textarea
         id="notes"

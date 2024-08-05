@@ -1,11 +1,13 @@
 /** @jsx jsx */
-import {jsx} from '@emotion/core'
+import {jsx} from '@emotion/core';
 
-import * as React from 'react'
-import {useQuery, useMutation, queryCache} from 'react-query'
-import {client} from 'utils/api-client'
-import {FaStar} from 'react-icons/fa'
-import * as colors from 'styles/colors'
+import * as React from 'react';
+import {useMutation, queryCache} from 'react-query';
+import {client} from 'utils/api-client';
+import {FaStar} from 'react-icons/fa';
+import * as colors from 'styles/colors';
+import {ErrorMessage} from 'components/lib';
+import {useUpdateListItem} from 'utils/list-items.exercise';
 
 const visuallyHiddenCSS = {
   border: '0',
@@ -16,35 +18,36 @@ const visuallyHiddenCSS = {
   padding: '0',
   position: 'absolute',
   width: '1px',
-}
+};
 
 function Rating({listItem, user}) {
-  const [isTabbing, setIsTabbing] = React.useState(false)
-  const [update] = useMutation(
-    updates =>
-      client(`list-items/${updates.id}`, {
-        data: updates,
-        method: 'PUT',
-        token: user.token,
-      }),
-    {onSettled: () => queryCache.invalidateQueries('list-items')},
-  )
+  const [isTabbing, setIsTabbing] = React.useState(false);
+  // const [update] = useMutation(
+  //   updates =>
+  //     client(`list-items/${updates.id}`, {
+  //       data: updates,
+  //       method: 'PUT',
+  //       token: user.token,
+  //     }),
+  //   {onSettled: () => queryCache.invalidateQueries('list-items')},
+  // );
+
+  const [update, {error, isError}] = useUpdateListItem();
 
   React.useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key === 'Tab') {
-        setIsTabbing(true)
-      }
+      if (event.key === 'Tab') setIsTabbing(true);
     }
-    document.addEventListener('keydown', handleKeyDown, {once: true})
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
 
-  const rootClassName = `list-item-${listItem.id}`
+    document.addEventListener('keydown', handleKeyDown, {once: true});
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const rootClassName = `list-item-${listItem.id}`;
 
   const stars = Array.from({length: 5}).map((x, i) => {
-    const ratingId = `rating-${listItem.id}-${i}`
-    const ratingValue = i + 1
+    const ratingId = `rating-${listItem.id}-${i}`;
+    const ratingValue = i + 1;
     return (
       <React.Fragment key={i}>
         <input
@@ -54,7 +57,10 @@ function Rating({listItem, user}) {
           value={ratingValue}
           checked={ratingValue === listItem.rating}
           onChange={() => {
-            update({id: listItem.id, rating: ratingValue})
+            update({
+              updates: {id: listItem.id, rating: ratingValue},
+              user: user,
+            });
           }}
           css={[
             visuallyHiddenCSS,
@@ -93,8 +99,8 @@ function Rating({listItem, user}) {
           <FaStar css={{width: '16px', margin: '0 2px'}} />
         </label>
       </React.Fragment>
-    )
-  })
+    );
+  });
   return (
     <div
       onClick={e => e.stopPropagation()}
@@ -108,8 +114,15 @@ function Rating({listItem, user}) {
       }}
     >
       <span css={{display: 'flex'}}>{stars}</span>
+      {isError ? (
+        <ErrorMessage
+          error={error}
+          variant="inline"
+          css={{marginLeft: 6, fontSize: '0.7em'}}
+        />
+      ) : null}
     </div>
-  )
+  );
 }
 
-export {Rating}
+export {Rating};
