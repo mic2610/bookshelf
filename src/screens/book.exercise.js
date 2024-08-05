@@ -6,40 +6,20 @@ import debounceFn from 'debounce-fn';
 import {FaRegCalendarAlt} from 'react-icons/fa';
 import Tooltip from '@reach/tooltip';
 import {useParams} from 'react-router-dom';
-import {useQuery, useMutation, queryCache} from 'react-query';
-import {useAsync} from 'utils/hooks';
-import {client} from 'utils/api-client';
+import {useBook} from 'utils/books';
+import {useListItem, useUpdateListItem} from 'utils/list-items';
 import {formatDate} from 'utils/misc';
 import * as mq from 'styles/media-queries';
 import * as colors from 'styles/colors';
-import {Textarea, ErrorMessage} from 'components/lib';
+import {Spinner, Textarea, ErrorMessage} from 'components/lib';
 import {Rating} from 'components/rating';
 import {StatusButtons} from 'components/status-buttons';
-import bookPlaceholderSvg from 'assets/book-placeholder.svg';
-import {
-  useListItem,
-  useListItems,
-  useUpdateListItem,
-  useRemoveListItem,
-  useCreateListItem,
-} from 'utils/list-items.exercise';
-import {Spinner} from 'components/lib';
-import {useBook} from 'utils/books.exercise';
-
-const loadingBook = {
-  title: 'Loading...',
-  author: 'loading...',
-  coverImageUrl: bookPlaceholderSvg,
-  publisher: 'Loading Publishing',
-  synopsis: 'Loading...',
-  loadingBook: true,
-};
 
 function BookScreen({user}) {
   const {bookId} = useParams();
-  const {data, error, isLoading, isError, isSuccess} = useBook(bookId, user);
-  const listItem = useListItem({user, bookId});
-  const book = data?.book ?? loadingBook;
+  const book = useBook(bookId, user);
+  const listItem = useListItem(user, bookId);
+
   const {title, author, coverImageUrl, publisher, synopsis} = book;
 
   return (
@@ -122,17 +102,14 @@ function ListItemTimeframe({listItem}) {
 }
 
 function NotesTextarea({listItem, user}) {
-  const [update, {error, isError, isLoading}] = useUpdateListItem();
+  const [mutate, {error, isError, isLoading}] = useUpdateListItem(user);
   const debouncedMutate = React.useMemo(
-    () => debounceFn(update, {wait: 300}),
-    [update],
+    () => debounceFn(mutate, {wait: 300}),
+    [mutate],
   );
 
   function handleNotesChange(e) {
-    debouncedMutate({
-      updates: {id: listItem.id, notes: e.target.value},
-      user: user,
-    });
+    debouncedMutate({id: listItem.id, notes: e.target.value});
   }
 
   return (
@@ -157,7 +134,7 @@ function NotesTextarea({listItem, user}) {
             css={{marginLeft: 6, fontSize: '0.7em'}}
           />
         ) : null}
-        {isLoading ? <Spinner css={{marginLeft: 6}} /> : null}
+        {isLoading ? <Spinner /> : null}
       </div>
       <Textarea
         id="notes"

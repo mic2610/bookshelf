@@ -1,28 +1,26 @@
 import {useQuery, useMutation, queryCache} from 'react-query';
-import {client} from 'utils/api-client';
-import {setQueryDataForBook} from './books.exercise';
+import {setQueryDataForBook} from './books';
+import {client} from './api-client';
 
-// const {data: listItems} = (user) => useQuery('list-items', () => client('list-items', {token: user.token}).then(data => data.listItems));
-function useListItems({user}) {
+function useListItems(user) {
   const {data: listItems} = useQuery({
-    queryKey: ['list-items'],
+    queryKey: 'list-items',
     queryFn: () =>
-      client('list-items', {token: user.token}).then(data => data.listItems),
+      client(`list-items`, {token: user.token}).then(data => data.listItems),
     config: {
       onSuccess(listItems) {
-        listItems.forEach(listItem => {
+        for (const listItem of listItems) {
           setQueryDataForBook(listItem.book);
-        });
+        }
       },
     },
   });
-
-  return {listItems};
+  return listItems ?? [];
 }
 
-function useListItem({user, bookId}) {
-  const {listItems} = useListItems({user});
-  return listItems?.find(li => li.bookId === bookId);
+function useListItem(user, bookId) {
+  const listItems = useListItems(user);
+  return listItems.find(li => li.bookId === bookId) ?? null;
 }
 
 const defaultMutationOptions = {
@@ -76,16 +74,16 @@ function useRemoveListItem(user, options) {
   );
 }
 
-const useCreateListItem = (user, mutationOptions) =>
-  useMutation(
-    ({bookId}) =>
-      client('list-items', {data: {bookId}, token: user.token, method: 'POST'}),
-    {...defaultMutationOptions, ...mutationOptions},
+function useCreateListItem(user, options) {
+  return useMutation(
+    ({bookId}) => client(`list-items`, {data: {bookId}, token: user.token}),
+    {...defaultMutationOptions, ...options},
   );
+}
 
 export {
-  useListItems,
   useListItem,
+  useListItems,
   useUpdateListItem,
   useRemoveListItem,
   useCreateListItem,

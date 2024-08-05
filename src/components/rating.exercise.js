@@ -2,12 +2,10 @@
 import {jsx} from '@emotion/core';
 
 import * as React from 'react';
-import {useMutation, queryCache} from 'react-query';
-import {client} from 'utils/api-client';
+import {useUpdateListItem} from 'utils/list-items';
 import {FaStar} from 'react-icons/fa';
 import * as colors from 'styles/colors';
 import {ErrorMessage} from 'components/lib';
-import {useUpdateListItem} from 'utils/list-items.exercise';
 
 const visuallyHiddenCSS = {
   border: '0',
@@ -22,23 +20,14 @@ const visuallyHiddenCSS = {
 
 function Rating({listItem, user}) {
   const [isTabbing, setIsTabbing] = React.useState(false);
-  // const [update] = useMutation(
-  //   updates =>
-  //     client(`list-items/${updates.id}`, {
-  //       data: updates,
-  //       method: 'PUT',
-  //       token: user.token,
-  //     }),
-  //   {onSettled: () => queryCache.invalidateQueries('list-items')},
-  // );
-
-  const [update, {error, isError}] = useUpdateListItem();
+  const [update, {error, isError}] = useUpdateListItem(user);
 
   React.useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key === 'Tab') setIsTabbing(true);
+      if (event.key === 'Tab') {
+        setIsTabbing(true);
+      }
     }
-
     document.addEventListener('keydown', handleKeyDown, {once: true});
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -57,10 +46,7 @@ function Rating({listItem, user}) {
           value={ratingValue}
           checked={ratingValue === listItem.rating}
           onChange={() => {
-            update({
-              updates: {id: listItem.id, rating: ratingValue},
-              user: user,
-            });
+            update({id: listItem.id, rating: ratingValue});
           }}
           css={[
             visuallyHiddenCSS,
