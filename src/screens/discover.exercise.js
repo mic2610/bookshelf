@@ -1,28 +1,29 @@
 /** @jsx jsx */
-import {jsx} from '@emotion/core'
+import {jsx} from '@emotion/core';
 
-import * as React from 'react'
-import Tooltip from '@reach/tooltip'
-import {FaSearch, FaTimes} from 'react-icons/fa'
-import * as colors from 'styles/colors'
-import {useBookSearch, useRefetchBookSearchQuery} from 'utils/books'
-import {BookRow} from 'components/book-row'
-import {BookListUL, Spinner, Input} from 'components/lib'
+import * as React from 'react';
+import Tooltip from '@reach/tooltip';
+import {FaSearch, FaTimes} from 'react-icons/fa';
+import * as colors from 'styles/colors';
+import {useBookSearch, useRefetchBookSearchQuery} from 'utils/books';
+import {BookRow} from 'components/book-row';
+import {BookListUL, Spinner, Input} from 'components/lib';
+import {Profiler} from 'components/profiler';
 
 function DiscoverBooksScreen() {
-  const [query, setQuery] = React.useState('')
-  const [queried, setQueried] = React.useState()
-  const {books, error, isLoading, isError, isSuccess} = useBookSearch(query)
-  const refetchBookSearchQuery = useRefetchBookSearchQuery()
+  const [query, setQuery] = React.useState('');
+  const [queried, setQueried] = React.useState();
+  const {books, error, isLoading, isError, isSuccess} = useBookSearch(query);
+  const refetchBookSearchQuery = useRefetchBookSearchQuery();
 
   React.useEffect(() => {
-    return () => refetchBookSearchQuery()
-  }, [refetchBookSearchQuery])
+    return () => refetchBookSearchQuery();
+  }, [refetchBookSearchQuery]);
 
   function handleSearchClick(event) {
-    event.preventDefault()
-    setQueried(true)
-    setQuery(event.target.elements.search.value)
+    event.preventDefault();
+    setQueried(true);
+    setQuery(event.target.elements.search.value);
   }
 
   return (
@@ -84,13 +85,18 @@ function DiscoverBooksScreen() {
           </div>
         )}
         {books.length ? (
-          <BookListUL css={{marginTop: 20}}>
-            {books.map(book => (
-              <li key={book.id} aria-label={book.title}>
-                <BookRow key={book.id} book={book} />
-              </li>
-            ))}
-          </BookListUL>
+          <Profiler
+            id="Discover Books Screen Book List"
+            metadata={{query, bookCount: books.length}}
+          >
+            <BookListUL css={{marginTop: 20}}>
+              {books.map(book => (
+                <li key={book.id} aria-label={book.title}>
+                  <BookRow key={book.id} book={book} />
+                </li>
+              ))}
+            </BookListUL>
+          </Profiler>
         ) : queried ? (
           <div css={{marginTop: 20, fontSize: '1.2em', textAlign: 'center'}}>
             {isLoading ? (
@@ -107,7 +113,7 @@ function DiscoverBooksScreen() {
         ) : null}
       </div>
     </div>
-  )
+  );
 }
 
-export {DiscoverBooksScreen}
+export {DiscoverBooksScreen};
